@@ -98,3 +98,39 @@
 (test (slash - '(10 2 3)) 5)
 (test (slash expt '(2 3 4)) 4096)
 (test (slash * (filter prime? (iota 100))) 2305567963945518424753102147331756070)
+
+
+; macro or
+(define-syntax myor
+  (syntax-rules ()
+    ((myor)
+     #f)
+    ((myor a b ...)
+     (let ((result a))
+       (if result
+           result
+           (myor b ...))))))
+     
+; macro and
+(define-syntax myand
+  (syntax-rules ()
+    ((myand)
+     #t)
+    ((myand a)
+      a)
+    ((myand a b ...)
+     (if a
+         (myand b ...)
+         #f))))
+         
+; macro while
+(define-syntax mywhile
+  (syntax-rules ()
+    ((mywhile cond body ...)
+     (let loop ()
+       (when cond
+         (begin
+           body ...
+           (loop)))))))
+
+(test (let ((i 0) (c 0)) (mywhile (< i 5) (set! c (+ c i)) (set! i (+ i 1))) c) 10)

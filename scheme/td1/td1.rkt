@@ -72,3 +72,15 @@
                 (display x)
                 (newline)))
             l))
+
+; filtre ---> avec map ??
+(define (filter test l)
+  (if (empty? l)
+      '()
+      (let ((filtered (filter test (cdr l))))
+        (if (test (car l))
+            (cons (car l) filtered)
+            filtered))))
+
+(test (filter (lambda (x) (> x 3)) '(1 10 2 20)) '(10 20))
+

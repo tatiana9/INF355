@@ -2,9 +2,8 @@
 
 ; procédure de tests unitaires
 (define (test x r)
-  (if (equal? x r)
-      (void)
-      (display "Bad test result")))
+  (unless (equal? x r)
+      (error "Bad test result")))
 
 ; plus petit nb impair strict supérieur à n
 (define (next-odd n)
@@ -84,3 +83,6 @@
 
 (test (filter (lambda (x) (> x 3)) '(1 10 2 20)) '(10 20))
 
+; slash
+;(define (slash operator l)
+ ; (if (

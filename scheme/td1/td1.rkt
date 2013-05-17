@@ -84,5 +84,17 @@
 (test (filter (lambda (x) (> x 3)) '(1 10 2 20)) '(10 20))
 
 ; slash
-;(define (slash operator l)
- ; (if (
+(define (slash operator l)
+  (letrec ((rev (reverse l))
+        (slashrev (lambda (x)
+                    (if (equal? (length x) 2)
+                        (operator (cadr x) (car x))
+                        (operator (slashrev (cdr x)) (car x))))))
+    (slashrev rev)))
+
+(test (slash * '(10 20 30)) 6000)
+(test (slash string-append '("foo" "bar")) "foobar")
+(test (slash + '(1 2 3)) 6)
+(test (slash - '(10 2 3)) 5)
+(test (slash expt '(2 3 4)) 4096)
+(test (slash * (filter prime? (iota 100))) 2305567963945518424753102147331756070)

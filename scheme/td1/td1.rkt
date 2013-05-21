@@ -169,7 +169,7 @@ a
 ;  body ...)
 
 ; contract : inv, post, pre définis comme des syntaxes ou des fonctions !
-; accumuler dans les listes pre et post les expressions (mettre inv dans pré et dans post)
+; accumuler dans des listes pre et post les expressions (mettre inv dans pré et dans post)
 ;puis évaluer tous les pre, évaluer le body, évaluer les post
 
 
@@ -177,7 +177,7 @@ a
 (define-syntax contract1
   (lambda (stx)
     (syntax-case stx ()
-      ((contract (pre cond1) (post cond2) (inv cond3) body )
+      ((_ (pre cond1) (post cond2) (inv cond3) body )
        (with-syntax ((presym (datum->syntax stx 'pre))
                      (postsym (datum->syntax stx 'post))
                      (invsym (datum->syntax stx 'inv)))
@@ -197,4 +197,59 @@ a
 
 
 ;contract v2
+;(define-syntax contract2
+;  (lambda (stx)
+;    (syntax-case stx()
+;      ((_ ((prefix condition) ...) body)
+;       (with-syntax ((presym (datum->syntax stx 'pre))
+;                     (postsym (datum->syntax stx 'post))
+;                     (invsym (datum->syntax stx 'inv)))
+;         (syntax
+;          (let ((preconds '())
+;                (postconds '()))
+;            (begin
+;              (case prefix ...
+;                ((presym)
+;                 (begin
+;                   (cons (condition ...) preconds)
+;                 (display "pre"))
+;                 ((postsym)
+;                 (begin
+;                   (cons (condition ...) postconds))
+;                 (display "pre"))
+;                ((invsym)
+;                 (begin
+;                   (cons (condition ...) preconds)
+;                   (cons (condition ...) (postconds))
+;                   (display "pre")))))))
+;          ))))))
 
+(define-syntax contract
+  (lambda (stx)
+    (syntax-case stx()
+      ((_ body ...)
+       (let ((pre (datum->syntax stx 'pre))
+             (post (datum->syntax stx 'post))
+             (inv (datum->syntax stx 'inv))
+             (postconds '()))
+         (define (check expr)
+           (lambda ()
+             (when (not expr)
+               (error "error !"))))
+         (define-syntax pre
+           (syntax-rules()
+             ((pre condition)
+              (check condition))))
+         (define-syntax post
+           (syntax-rules()
+             ((post condition)
+              (set! postconds (cons postconds condition)))))
+         (syntax
+          (begin body ...)))))))
+                
+                
+              
+                 
+                 
+
+(contract (pre (equal? 1 1)) 1)

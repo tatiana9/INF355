@@ -160,5 +160,41 @@
 
 (define-trace a 3)
 a
-; structures
+
+
+;(contract
+;  (pre expression) ...
+;  (post expression) ...
+;  (inv expression) ...
+;  body ...)
+
+; contract : inv, post, pre définis comme des syntaxes ou des fonctions !
+; accumuler dans les listes pre et post les expressions (mettre inv dans pré et dans post)
+;puis évaluer tous les pre, évaluer le body, évaluer les post
+
+
+; contract v1
+(define-syntax contract1
+  (lambda (stx)
+    (syntax-case stx ()
+      ((contract (pre cond1) (post cond2) (inv cond3) body )
+       (with-syntax ((presym (datum->syntax stx 'pre))
+                     (postsym (datum->syntax stx 'post))
+                     (invsym (datum->syntax stx 'inv)))
+         (syntax
+          (let ((precond cond1)
+                (invcond cond3)
+                (postcond cond2))
+            (if (and precond invcond)
+                (begin
+                  (let ((result body))
+                    (if (and postcond invcond)
+                        result
+                        (error "error post or inv"))))
+                (error "error pre or inv")))))))))
+;test
+(contract1 (pre (equal? 1 1)) (post (equal? 1 1)) (inv (equal? 1 1)) 3)
+
+
+;contract v2
 

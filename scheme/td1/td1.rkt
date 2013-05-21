@@ -134,3 +134,31 @@
            (loop)))))))
 
 (test (let ((i 0) (c 0)) (mywhile (< i 5) (set! c (+ c i)) (set! i (+ i 1))) c) 10)
+
+; macro trace
+(define-syntax define-trace
+  (syntax-rules ()
+    ((define-trace (head args ...) body ...)
+     (define head
+       (lambda (args ...)
+         (begin
+           (display "entree\n")
+           (begin0
+             body ...
+             (display "sortie"))))))
+    ((define-trace id expr)
+     (define id
+       (begin
+           (display "entree\n")
+           (begin0
+             expr
+             (display "sortie")))))))
+
+(define-trace (ff x)
+  (+ 1 x))
+(ff 3)
+
+(define-trace a 3)
+a
+; structures
+

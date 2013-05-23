@@ -158,8 +158,8 @@
   (+ 1 x))
 (ff 3)
 
-(define-trace a 3)
-a
+;(define-trace a 3)
+;a
 
 
 ;(contract
@@ -193,37 +193,10 @@ a
                         (error "error post or inv"))))
                 (error "error pre or inv")))))))))
 ;test
-(contract1 (pre (equal? 1 1)) (post (equal? 1 1)) (inv (equal? 1 1)) 3)
+;(contract1 (pre (equal? 1 1)) (post (equal? 1 1)) (inv (equal? 1 1)) 3)
 
 
-;contract v2
-;(define-syntax contract2
-;  (lambda (stx)
-;    (syntax-case stx()
-;      ((_ ((prefix condition) ...) body)
-;       (with-syntax ((presym (datum->syntax stx 'pre))
-;                     (postsym (datum->syntax stx 'post))
-;                     (invsym (datum->syntax stx 'inv)))
-;         (syntax
-;          (let ((preconds '())
-;                (postconds '()))
-;            (begin
-;              (case prefix ...
-;                ((presym)
-;                 (begin
-;                   (cons (condition ...) preconds)
-;                 (display "pre"))
-;                 ((postsym)
-;                 (begin
-;                   (cons (condition ...) postconds))
-;                 (display "pre"))
-;                ((invsym)
-;                 (begin
-;                   (cons (condition ...) preconds)
-;                   (cons (condition ...) (postconds))
-;                   (display "pre")))))))
-;          ))))))
-
+;contract v2 : ne marche pas pour le moment
 (define-syntax contract
   (lambda (stx)
     (syntax-case stx()
@@ -237,19 +210,17 @@ a
              (when (not expr)
                (error "error !"))))
          (define-syntax pre
-           (syntax-rules()
+           (syntax-rules(pre)
              ((pre condition)
               (check condition))))
          (define-syntax post
-           (syntax-rules()
+           (syntax-rules(post)
              ((post condition)
               (set! postconds (cons postconds condition)))))
          (syntax
-          (begin body ...)))))))
-                
-                
-              
-                 
-                 
+          (begin 
+            body ...
+            ;do a loop on postconds
+            )))))))
 
-(contract (pre (equal? 1 1)) 1)
+(contract 1)

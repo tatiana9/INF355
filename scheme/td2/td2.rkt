@@ -28,31 +28,36 @@
 
 ; syntax->list : renvoie une liste de syntaxes (exp avec plusieurs expr dans une liste, le tout est une syntaxe => renvoie la liste des expr syntaxiques)
 
+;dévinition de amb comme nouvelle syntaxe => évaluation des arguments au moment de l'utilisation
 (define-syntax amb
   (syntax-rules ()
     ((amb)
      (fail))
-    ((amb x . queue)
-     (begin
+    ((amb x queue ...)
        (let/cc k
          (let ((old-fail fail))
            (set! fail (lambda ()
                         (set! fail old-fail)
-                        (k (amb queue))))))
-       (car x)))))
+                        (k (amb queue ...)))))
+         x))))
 
+(define (produce n)
+  (printf "Producing ~s~n" n)
+  n)
 
-
-;(define-syntax (amb stx)
-;  (syntax-case stx()
-;    ((_ args ...)
-;     (let ((amb (datum->syntax stx 'amb)
-     
+;(amb (produce 1) (produce 2) (produce 3))
 
 (define (mult)
-  (let ((x (amb1 1 2 3 4 5 6 7 8 9 10))
-        (y (amb1 1 2 3 4 5 6 7 8 9 10)))
+  (let ((x (amb 1 2 3 4 5 6 7 8 9 10))
+        (y (amb 1 2 3 4 5 6 7 8 9 10)))
      (if (= (* x y) 30) 
          (list x y) 
-         (amb1))))
-;(mult)
+         (amb))))
+
+(define (bag-of proc)
+  (let ((results '()))
+    (if (amb #t #f)
+        (begin
+          (set! results (cons (proc) results))
+          (fail))
+        (reverse results))))

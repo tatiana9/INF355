@@ -196,31 +196,41 @@
 ;(contract1 (pre (equal? 1 1)) (post (equal? 1 1)) (inv (equal? 1 1)) 3)
 
 
-;contract v2 : ne marche pas pour le moment
+;contract v2 
+;; pb : postconds: identifier used out of context in: postcond ????...
 (define-syntax contract
   (lambda (stx)
     (syntax-case stx()
       ((_ body ...)
        (let ((pre (datum->syntax stx 'pre))
              (post (datum->syntax stx 'post))
-             (inv (datum->syntax stx 'inv))
-             (postconds '()))
-         (define (check expr)
-           (lambda ()
-             (when (not expr)
-               (error "error !"))))
-         (define-syntax pre
-           (syntax-rules(pre)
-             ((pre condition)
-              (check condition))))
-         (define-syntax post
-           (syntax-rules(post)
-             ((post condition)
-              (set! postconds (cons postconds condition)))))
-         (syntax
-          (begin 
-            body ...
-            ;do a loop on postconds
-            )))))))
-
-(contract 1)
+             (inv (datum->syntax stx 'inv)))
+         #`(let ((postconds '()))
+             (define (check pref expr)
+               (unless expr
+                 (error (format "~acondition failed" pref))))
+             (define-syntax #,pre
+               (lambda (x)
+                 (syntax-case x()
+                   ((_ condition)
+                    #'(check "pre" condition)))))
+             (define-syntax (#,post x)
+                 (syntax-case x()
+                   ((_ condition)
+                    (set! postconds (cons
+                                     (lambda ()
+                                       (check "post" condition))
+                                     postconds)))))
+             (define-syntax #,inv 
+               (lambda (x)
+                 (syntax-case x()
+                   ((_ condition)
+                    (begin
+                      (#,pre condition)
+                      (#,post condition))))))
+             (begin0
+               (begin body ...)
+               (for-each (lambda (f) (f)) postconds))))))))
+   
+(contract (pre (equal? 1 1)) (post (equal? 2 2)) (inv (equal? 3 3)) (+ 1 2 3 4))
+                     
